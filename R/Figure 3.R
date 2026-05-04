@@ -110,7 +110,7 @@ pls_ki67  <- plsr(Y ~ ., data = data.frame(Y = Y, X),
                   ncomp = ncomp_use, validation = "CV", scale = TRUE)
 
 ## VIP via the shared `pls_vip` helper at the top of this file
-## (identical helper in Figures 1-4) at ncomp_use = 6.
+## (identical helper in Figures 1-4) at ncomp_use = 3.
 vip_vals <- pls_vip(pls_ki67, ncomp_use)
 coefs    <- coef(pls_ki67, ncomp = ncomp_use)
 
