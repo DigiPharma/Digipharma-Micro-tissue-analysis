@@ -5,7 +5,7 @@
 ##       mNR (n = 8) vs mR (n = 6), two-sided Mann-Whitney U test.
 ##       Format follows Lu et al., Nat Commun 2021, Fig. 4a.
 ##   (B) VIP score vs PLS coefficient from PLS-R with Ki67 as output
-##       on the immune-poor ROIs. ncomp = 6 (matches Nat Commun
+##       on the immune-poor ROIs. ncomp = 3 (matches Nat Commun
 ##       Fig. 4c). B7-H3 and IDO-1 are highlighted in red.
 ##   (C) Scatter of B7-H3 vs IDO-1 across all immune-poor ROIs,
 ##       colored by Ki67 (viridis), shape by molecular response.
