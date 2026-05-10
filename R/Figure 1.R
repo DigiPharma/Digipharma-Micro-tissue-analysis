@@ -51,7 +51,7 @@ gbm_ir <- gbm %>% filter(`Ratio of CD45+ cells` >= 0.25)
 X <- gbm_ir %>% select(-c(1:5)) %>% select(-CD8A, -CD3)
 Y <- gbm_ir$CD8A
 
-## ---- 2. Fit PLS-R with leave-one-out CV ----------------------------
+## ---- 2. Fit PLS-R with 10-fold CV ----------------------------------
 ncomp_max <- 20
 plsr.mod  <- plsr(Y ~ ., data = data.frame(Y = Y, X), ncomp = ncomp_max,
                   validation = "CV", scale = TRUE)
