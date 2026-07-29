@@ -1,14 +1,12 @@
 ######################################################################
 ## Figure 2 - PLS-DA prediction model for treatment response
 ##
-## Derives the 5-protein prediction formula directly from the
-## PLS-DA model. All panels are generated from the fitted models.
 ##
 ## (A) VIP score vs. PLS-DA coefficient (11-protein model).
 ##     The 5 proteins above VIP > 1 are identified for the
 ##     final prediction model.
 ## (B) ROI-level box plot of 5-protein model predictions, with
-##     the model-derived prediction formula displayed.
+##     the prediction formula displayed.
 ## (C) ROI-level ROC curve and AUC.
 ## (D) Tissue-level box plot: per-ROI predictions averaged within
 ##     each Sample ID (n = 8 mNR and 4 mR).
@@ -17,8 +15,8 @@
 ## Data:
 ##   Raw data_plsda round 1.xlsx - 11 proteins (input to Panel A)
 ##   Raw data_plsda round 2.xlsx - 5 proteins + metadata (input to
-##     the 5-protein PLS-DA; the pre-computed Predictions column
-##     is NOT used)
+##     the 5-protein PLS-DA; the workbook's own Predictions column
+##     is overwritten by this script)
 ######################################################################
 
 suppressPackageStartupMessages({
@@ -31,6 +29,9 @@ suppressPackageStartupMessages({
   library(pROC)
   library(patchwork)
 })
+
+## Fix the CV fold draw so Q2 is reproducible (protocol troubleshooting).
+set.seed(42)
 
 ## ---- Standard PLS VIP helper ---------------------------------------
 pls_vip <- function(model, ncomp) {
@@ -92,13 +93,18 @@ vip_dat <- data.frame(
 selected <- c("CD11c", "CD163", "CD44", "CD66B", "PTEN")
 vip_dat$above <- vip_dat$Gene %in% selected
 
+## Display label only. `Gene` keeps the workbook's own column header,
+## CD66B, because every lookup in this script indexes the data by it.
+## The figure and the manuscript spell the protein CD66b.
+vip_dat$Label <- ifelse(vip_dat$Gene == "CD66B", "CD66b", vip_dat$Gene)
+
 p_A <- ggplot(vip_dat, aes(Coef, Importance)) +
   geom_hline(yintercept = 1.0, linetype = "dashed", color = "blue") +
   geom_vline(xintercept = 0,   linetype = "dashed", color = "black") +
   geom_point(data = subset(vip_dat, !above), color = "grey60", size = 1.8) +
   geom_point(data = subset(vip_dat,  above), color = "red",    size = 2.4) +
   geom_text_repel(data = subset(vip_dat, above),
-                  aes(label = Gene),
+                  aes(label = Label),
                   size = 3, box.padding = 0.35,
                   segment.color = "grey40", segment.size = 0.3,
                   max.overlaps = Inf) +
@@ -126,8 +132,8 @@ intercept   <- coefs_5_raw[1, , ]
 slopes      <- coefs_5_raw[-1, , ]
 
 ## Print the derived prediction formula
-cat("\n5-protein prediction formula (model-derived):\n")
-cat(sprintf("Prediction = %.4f*CD11c %+.4f*CD163 %+.4f*CD44 %+.4f*CD66B %+.4f*PTEN %+.4f\n",
+cat("\n5-protein prediction formula:\n")
+cat(sprintf("Prediction = %.4f*CD11c %+.4f*CD163 %+.4f*CD44 %+.4f*CD66b %+.4f*PTEN %+.4f\n",
             slopes["CD11c"], slopes["CD163"], slopes["CD44"],
             slopes["CD66B"], slopes["PTEN"], intercept))
 
@@ -136,15 +142,15 @@ r2$Predictions_model <- as.numeric(predict(plsda_5, newdata = X_5, ncomp = 3))
 
 ## Build the formula label from the model coefficients
 formula_lbl <- sprintf(
-  "Prediction = %.4f*CD11c %+.4f*CD163\n%+.4f*CD44 %+.4f*CD66B %+.4f*PTEN %+.4f",
+  "Prediction = %.4f*CD11c %+.4f*CD163\n%+.4f*CD44 %+.4f*CD66b %+.4f*PTEN %+.4f",
   slopes["CD11c"], slopes["CD163"], slopes["CD44"],
   slopes["CD66B"], slopes["PTEN"], intercept)
 
 ## ====================================================================
-## Panels B-E: use MODEL-derived predictions
+## Panels B-E: ROI- and tissue-level predictions and ROC curves
 ## ====================================================================
 
-## Use model predictions for all downstream panels
+## Overwrite the workbook's Predictions column
 roi_data <- r2
 roi_data$Predictions <- roi_data$Predictions_model
 
@@ -156,7 +162,7 @@ p_B <- ggplot(roi_data,
   geom_jitter(width = 0.18, color = "black", size = 1.4, alpha = 0.6) +
   scale_fill_manual(values = c("Nonresponder" = "lightblue",
                                "Responder"    = "lightpink")) +
-  labs(title = ">25% CD45+ ROIs",
+  labs(title = ">=25% CD45+ ROIs",
        subtitle = formula_lbl,
        x = "Molecular Response", y = "Predictions") +
   theme_classic(base_size = 10) +
@@ -166,7 +172,7 @@ p_B <- ggplot(roi_data,
 
 ## ---- Panel C: ROI-level ROC ----------------------------------------
 roc_roi <- roc(roi_data$pls_code, roi_data$Predictions, quiet = TRUE)
-cat(sprintf("\nROI-level AUC (model-derived): %.3f\n", as.numeric(auc(roc_roi))))
+cat(sprintf("\nROI-level AUC: %.3f\n", as.numeric(auc(roc_roi))))
 p_C <- roc_panel(roc_roi, "ROC Curve (ROI level)")
 
 ## ---- Panel D: tissue-level box plot --------------------------------

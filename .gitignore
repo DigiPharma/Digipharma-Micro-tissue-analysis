@@ -4,20 +4,20 @@
 .Rproj.user/
 .Ruserdata
 
-# OS / editor cruft
+# OS and editor cruft
 .DS_Store
 Thumbs.db
 *.swp
 *~
 
-# Per-user RStudio workspace state
-*.Rproj.user
-
-# Caches (knitr / rmarkdown / quarto, if anyone ever adds those)
+# Caches
 *_cache/
 *_files/
 .quarto/
 
-# Endnote / Office lock files
+# Office lock files
 ~$*
 *.tmp
+
+# Large source data, re-fetched on demand
+data/

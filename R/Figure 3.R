@@ -25,14 +25,16 @@ suppressPackageStartupMessages({
   library(patchwork)
 })
 
+## CV folds are random; fix for a reproducible figure.
+set.seed(42)
+
 ## ---- Standard PLS VIP helper ---------------------------------------
 ## VIP_j = sqrt(p * sum_a (SSY_a * w_aj^2 / sum_k w_ak^2) / sum_a SSY_a)
 ## (Wold et al., textbook PLS VIP). mean(VIP^2) = 1 so VIP > 1 is the
 ## conventional "above-average importance" cutoff.
 ##
-## The SAME function definition appears in Figure 1.R, Figure 2.R,
-## Figure 3.R, and Figure 4.R - one VIP computation across the whole
-## protocol. If you ever change it, change it in all four files.
+## The same definition appears in Figures 1, 2, 3, 4 and S2 - one VIP
+## computation across the whole protocol.
 pls_vip <- function(model, ncomp) {
   W <- model$loading.weights[, 1:ncomp, drop = FALSE]
   T <- model$scores[,         1:ncomp, drop = FALSE]
@@ -63,7 +65,7 @@ cat(sprintf("Immune-poor ROIs: n = %d across %d tissues\n",
 ## The paper's Fig. 4a Mann-Whitney test is computed on the LINEAR
 ## count density, not on the log values, so we back-transform each
 ## ROI before averaging to tissue level. This reproduces the
-## published statistic (U = 7, two-sided p = 0.029, n = 8 mNR + 6 mR).
+## published statistic (two-sided p = 0.029, n = 8 mNR + 6 mR).
 tissue <- ip %>%
   mutate(Ki67_linear = exp(Ki67) - 1) %>%
   group_by(`Sample ID`, `Patient ID`, Molecular_Response) %>%
@@ -75,7 +77,7 @@ mw <- wilcox.test(mean_Ki67 ~ Molecular_Response,
                   data = tissue)
 n_nr <- sum(tissue$Molecular_Response == "Nonresponder")
 n_r  <- sum(tissue$Molecular_Response == "Responder")
-cat(sprintf("Tissue-level: n_NR=%d, n_R=%d, U=%.1f, p=%.4f\n",
+cat(sprintf("Tissue-level: n_NR=%d, n_R=%d, W=%.1f, p=%.4f\n",
             n_nr, n_r, mw$statistic, mw$p.value))
 
 ymax <- max(tissue$mean_Ki67) * 1.07
@@ -109,8 +111,7 @@ ncomp_use <- 3
 pls_ki67  <- plsr(Y ~ ., data = data.frame(Y = Y, X),
                   ncomp = ncomp_use, validation = "CV", scale = TRUE)
 
-## VIP via the shared `pls_vip` helper at the top of this file
-## (identical helper in Figures 1-4) at ncomp_use = 3.
+## VIP via the shared `pls_vip` helper at the top of this file.
 vip_vals <- pls_vip(pls_ki67, ncomp_use)
 coefs    <- coef(pls_ki67, ncomp = ncomp_use)
 
@@ -127,6 +128,10 @@ dat_B$class <- ifelse(dat_B$Protein %in% spotlight, "spotlight",
                 ifelse(dat_B$Importance > 1.0,      "important",
                                                     "other"))
 
+## Display label only. `Protein` keeps the workbook's own column header,
+## Pan-CK, which the spotlight test and every other lookup rely on.
+dat_B$Label <- ifelse(dat_B$Protein == "Pan-CK", "PanCK", dat_B$Protein)
+
 p_B <- ggplot(dat_B, aes(Coef, Importance)) +
   geom_hline(yintercept = 1, linetype = "dashed", color = "blue") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
@@ -137,7 +142,7 @@ p_B <- ggplot(dat_B, aes(Coef, Importance)) +
   geom_point(data = subset(dat_B, class == "spotlight"),
              color = "red",   size = 2.6) +
   geom_text_repel(data = subset(dat_B, class != "other"),
-                  aes(label = Protein,
+                  aes(label = Label,
                       color = class),
                   size = 2.5, box.padding = 0.25,
                   segment.color = "grey40", segment.size = 0.3,

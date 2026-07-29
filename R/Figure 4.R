@@ -24,14 +24,16 @@ suppressPackageStartupMessages({
   library(patchwork)
 })
 
+## CV folds are random; fix for a reproducible figure.
+set.seed(42)
+
 ## ---- Standard PLS VIP helper ---------------------------------------
 ## VIP_j = sqrt(p * sum_a (SSY_a * w_aj^2 / sum_k w_ak^2) / sum_a SSY_a)
 ## (Wold et al., textbook PLS VIP). mean(VIP^2) = 1 so VIP > 1 is the
 ## conventional "above-average importance" cutoff.
 ##
-## The SAME function definition appears in Figure 1.R, Figure 2.R,
-## Figure 3.R, and Figure 4.R - one VIP computation across the whole
-## protocol. If you ever change it, change it in all four files.
+## The same definition appears in Figures 1, 2, 3, 4 and S2 - one VIP
+## computation across the whole protocol.
 pls_vip <- function(model, ncomp) {
   W <- model$loading.weights[, 1:ncomp, drop = FALSE]
   T <- model$scores[,         1:ncomp, drop = FALSE]
@@ -51,11 +53,42 @@ OUT_JPG  <- here::here("figures", "Figure 4.jpg")
 abs_d <- read_csv(ABS_FILE, show_col_types = FALSE)
 all_d <- read_excel(ALL_FILE)
 
+## ---- "GI" to "gut" -------------------------------------------------
+## "GI" is a value inside the Tissue column of both source files, not a
+## display string, and the manuscript says "gut" in every one of its
+## mentions. Recode both data frames here, before any select, pivot,
+## facet or factor call.
+##
+## Renaming only the hard-coded colour, level and shape vectors further
+## down would leave the data still saying "GI", and then ggplot finds no
+## match: the panel A facet strip would still read "GI", panel B's boxes
+## would fall back to grey, and scale_shape_manual would hand panel C NA
+## shapes, so every point would disappear.
+##
+## The source CSV and XLSX are not modified.
+abs_d$Tissue <- ifelse(abs_d$Tissue == "GI", "gut", abs_d$Tissue)
+all_d$Tissue <- ifelse(all_d$Tissue == "GI", "gut", all_d$Tissue)
+
 cell_cols <- setdiff(
   colnames(abs_d),
   c("Tissue", "ROI", "Mixture", "P-value", "Correlation",
     "RMSE", "Absolute score (sig.score)")
 )
+
+## ---- Panels A and B only: row-normalize to true fractions ----------
+## CIBERSORTx absolute mode returns scores whose row sums vary, 1.259 to
+## 2.058 across these ROIs, and equal the "Absolute score (sig.score)"
+## column exactly. The raw values are therefore not fractions. Dividing
+## each ROI by its own row total makes panel A's stacked bars sum to 1
+## and makes panel B's M1 a true fraction of that ROI's immune cells,
+## which is what both axis labels already say.
+##
+## This applies to abs_d ONLY. all_d, which feeds the PLS-R in panels C
+## and D, is left on the absolute scale. Once the 22 cell
+## types sum to 1, M1 equals 1 minus the other 21 exactly, so the
+## regression would be fitting an identity rather than a relationship.
+abs_d[cell_cols] <- sweep(as.matrix(abs_d[cell_cols]), 1,
+                          rowSums(abs_d[cell_cols]), "/")
 
 ## ---- Panel A: stacked bar of immune-cell fractions -----------------
 long_d <- abs_d %>%
@@ -89,7 +122,7 @@ p_A <- ggplot(long_d,
 p_B <- ggplot(abs_d, aes(Tissue, `Macrophages M1`, fill = Tissue)) +
   geom_boxplot(outlier.shape = NA, width = 0.55, alpha = 0.85) +
   geom_jitter(width = 0.15, color = "black", size = 1.6, alpha = 0.7) +
-  scale_fill_manual(values = c("lung" = "#FFC0CB", "GI" = "#ADD8E6")) +
+  scale_fill_manual(values = c("lung" = "#FFC0CB", "gut" = "#ADD8E6")) +
   labs(title = "M1 fraction by tissue",
        x = "Tissue", y = "M1 Fraction") +
   theme_classic(base_size = 10) +
@@ -127,16 +160,21 @@ metrics_label_m1 <- sprintf("R²X=%.3f  R²Y=%.3f\nQ²=%.3f",
 df_C <- data.frame(Observed  = Y_all,
                    Predicted = preds,
                    Tissue    = factor(all_d$Tissue,
-                                      levels = c("lung", "GI")))
+                                      levels = c("lung", "gut")))
 
+## Panels C and D run on the absolute scale while panels A and B are
+## normalized, so the axes say so. Without this, the same ROI appears as
+## two different numbers in panel B and panel C with nothing telling the
+## reader they are different quantities.
 p_C <- ggplot(df_C, aes(Observed, Predicted, shape = Tissue)) +
   geom_abline(slope = 1, intercept = 0, color = "red", linewidth = 0.6) +
   geom_point(size = 1.5, stroke = 0.5) +
-  scale_shape_manual(values = c("lung" = 3, "GI" = 1)) +
+  scale_shape_manual(values = c("lung" = 3, "gut" = 1)) +
   annotate("text", x = Inf, y = -Inf, label = metrics_label_m1,
            hjust = 1.1, vjust = -0.5, size = 3) +
   labs(title = "M1: actual vs. predicted",
-       x = "Observed", y = "Predicted") +
+       x = "Observed M1 (a.u.)",
+       y = "Predicted M1 (a.u.)") +
   theme_classic(base_size = 10) +
   theme(plot.title = element_text(hjust = 0.5, size = 10),
         legend.position = c(0.12, 0.88),
@@ -144,8 +182,7 @@ p_C <- ggplot(df_C, aes(Observed, Predicted, shape = Tissue)) +
         legend.background = element_rect(fill = NA, color = NA))
 
 ## ---- Panel D: VIP-coefficient plot ---------------------------------
-## VIP via the shared `pls_vip` helper at the top of this file
-## (identical helper in Figures 1-4) at ncomp_use = 8.
+## VIP via the shared `pls_vip` helper at the top of this file.
 vip_vals <- pls_vip(pls_m1, ncomp_use)
 coef_v   <- coef(pls_m1, ncomp = ncomp_use)
 
@@ -171,7 +208,7 @@ p_D <- ggplot(dat_D, aes(Coef, Importance)) +
   theme_classic(base_size = 10) +
   theme(plot.title = element_text(hjust = 0.5, size = 10))
 
-## ---- Compose 2 x 2 layout and write outputs ------------------------
+## ---- Compose layout and write outputs ------------------------------
 mid4 <- p_B | p_C
 fig4 <- (p_A / mid4 / p_D) +
   plot_layout(heights = c(1.3, 1, 1)) +

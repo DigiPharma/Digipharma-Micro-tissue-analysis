@@ -20,15 +20,17 @@ suppressPackageStartupMessages({
   library(patchwork)
 })
 
+## CV folds are random; fix for a reproducible figure.
+set.seed(42)
+
 ## ---- Standard PLS VIP helper ---------------------------------------
 ## VIP_j = sqrt(p * sum_a (SSY_a * w_aj^2 / sum_k w_ak^2) / sum_a SSY_a)
 ## (Wold et al., the textbook PLS VIP). With this convention
 ## mean(VIP^2) = 1, so VIP > 1 is the conventional "above-average
 ## importance" cutoff.
 ##
-## The SAME function definition appears in Figure 1.R, Figure 2.R,
-## Figure 3.R, and Figure 4.R - one VIP computation across the whole
-## protocol. If you ever change it, change it in all four files.
+## The same definition appears in Figures 1, 2, 3, 4 and S2 - one VIP
+## computation across the whole protocol.
 pls_vip <- function(model, ncomp) {
   W <- model$loading.weights[, 1:ncomp, drop = FALSE]
   T <- model$scores[,         1:ncomp, drop = FALSE]
@@ -44,7 +46,7 @@ DATA    <- here::here("Nat commun data", "Raw data.xlsx")
 OUT_PDF <- here::here("figures", "Figure 1.pdf")
 OUT_JPG <- here::here("figures", "Figure 1.jpg")
 
-## ---- 1. Load and filter to immune-rich (>25% CD45+) ----------------
+## ---- 1. Load and filter to immune-rich (>=25% CD45+) ----------------
 gbm <- read_excel(DATA, sheet = "GBM")
 gbm_ir <- gbm %>% filter(`Ratio of CD45+ cells` >= 0.25)
 
@@ -87,7 +89,9 @@ p_A <- ggplot(df_pred, aes(Observed, Predicted, shape = Response)) +
   scale_shape_manual(values = c("Responder" = 3, "Nonresponder" = 1)) +
   annotate("text", x = Inf, y = -Inf, label = metrics_label,
            hjust = 1.1, vjust = -0.5, size = 3.5) +
-  labs(title = "GBM-Pembro - >25% CD45+ cells ROIs",
+  ## Plain ASCII ">=" rather than the glyph: the Helvetica pdf() device
+  ## cannot encode U+2265 and silently substitutes.
+  labs(title = "GBM anti-PD-1 - >=25% CD45+ cells ROIs",
        x = "Observed Values", y = "Predicted Values") +
   theme_classic(base_size = 11) +
   theme(legend.position = c(0.12, 0.88),
@@ -127,8 +131,7 @@ p_B <- ggplot(msep_df, aes(ncomp, MSEP, color = type, linetype = type)) +
         legend.text = element_text(size = 8))
 
 ## ---- 5. Panel C: VIP vs. coefficient -------------------------------
-## VIP via the shared `pls_vip` helper at the top of this file
-## (identical helper in Figures 1-4) evaluated at ncomp_use.
+## VIP via the shared `pls_vip` helper at the top of this file.
 vip_vals <- pls_vip(plsr.mod, ncomp_use)
 coefs    <- coef(plsr.mod, ncomp = ncomp_use)
 

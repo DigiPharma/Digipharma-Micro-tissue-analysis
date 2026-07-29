@@ -47,7 +47,9 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
 │   ├── Figure 1.R   — PLS-R of CD8A in immune-rich GBM ROIs
 │   ├── Figure 2.R   — PLS-DA prediction model for treatment response (5 panels A–E)
 │   ├── Figure 3.R   — PLS-R of Ki67 in immune-poor ROIs (highlights B7-H3 / IDO-1)
-│   └── Figure 4.R   — Lung-vs-gut PLS-R of Macrophage M1 fraction
+│   ├── Figure 4.R   — Lung-vs-gut PLS-R of Macrophage M1 fraction
+│   ├── Figure S2.R  — platform generalization: PLS-R of CD8A on 10x Visium pseudo-ROIs
+│   └── Figure S3.R  — permutation null for the worked example 1 cross-validated Q²
 ├── Nat commun data/        # demonstration dataset 1 (Lu et al., 2021)
 │   ├── Raw data.xlsx
 │   ├── Raw data_plsda round 1.xlsx
@@ -55,11 +57,16 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
 ├── Cell Rep data/          # demonstration dataset 2 (Ng et al., 2023)
 │   ├── absolute cell fraction.csv
 │   └── whole cell fraction.xlsx
-└── figures/                # pre-rendered, editable PDFs of the four figures
-    ├── Figure 1.pdf
-    ├── Figure 2.pdf
-    ├── Figure 3.pdf
-    └── Figure 4.pdf
+├── visium_demo/            # Python preprocessing for the Visium demonstration
+│   ├── 4_format_breast_regression.py
+│   ├── breast_roi_immune_matrix.csv    # derived input to R/Figure S2.R
+│   ├── spot_to_roi.csv                 # per-spot pseudo-ROI assignment
+│   ├── scalefactors_json.json          # 10x slide scale factors
+│   └── tissue_hires_image.png          # 10x tissue image, panels A and B
+└── figures/                # pre-rendered, editable PDFs plus 300 dpi JPGs
+    ├── Figure 1.pdf   … Figure 4.pdf
+    ├── Figure S2.pdf
+    └── Figure S3.pdf
 ```
 
 ## How to reproduce the figures
@@ -69,7 +76,7 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
 2. Clone this repository:
 
    ```bash
-   git clone https://github.com/huiqian-hu/Digipharma-Micro-tissue-analysis.git
+   git clone https://github.com/DigiPharma/Digipharma-Micro-tissue-analysis.git
    ```
 
    then open `Digipharma-Micro-tissue-analysis.Rproj` in RStudio. (If you do
@@ -81,7 +88,8 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
    install.packages(c(
      "here", "readxl", "readr", "tidyr", "dplyr",
      "pls", "ggplot2", "ggrepel", "patchwork",
-     "pROC", "viridis"
+     "pROC", "viridis",
+     "jsonlite", "png"          # required by R/Figure S2.R only
    ))
    ```
 
@@ -92,10 +100,17 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
    source("R/Figure 2.R")
    source("R/Figure 3.R")
    source("R/Figure 4.R")
+   source("R/Figure S2.R")
+   source("R/Figure S3.R")
    ```
 
-   Each script reads its inputs from `Nat commun data/` or `Cell Rep data/`
-   and writes its panels into `figures/` as a vector PDF.
+   Each script reads its inputs from `Nat commun data/`, `Cell Rep data/` or
+   `visium_demo/` and writes its panels into `figures/` as a vector PDF and a
+   300 dpi JPG.
+
+   `R/Figure S2.R` reads only the derived files committed in `visium_demo/`, so
+   it runs from a fresh clone without downloading the 10x slide. Re-running the
+   Python preprocessing is optional and is described in `visium_demo/README.md`.
 
 ## Notes on the analysis
 
@@ -106,14 +121,13 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
 - **VIP scores** are computed via the inline helper `pls_vip()`, which
   implements the standard formula
   `VIP_j = sqrt(p · Σ_a (SSY_a · w_aj² / Σ_k w_ak²) / Σ_a SSY_a)`.
-  The same helper definition appears in all four scripts so the protocol
+  The same helper definition appears in all five scripts so the protocol
   applies one consistent VIP method throughout. With this convention
   `mean(VIP²) = 1`, so the conventional cutoff is `VIP > 1`.
 - **Mann–Whitney p-values** (Figure 2D, Figure 3A) use R's exact small-sample
   test (default behaviour of `wilcox.test()`).
-- **ROC curves** (Figure 2C, 2E) are drawn with `geom_step(direction = "vh")`
-  on data sorted by descending specificity, with an explicit `geom_segment`
-  diagonal — see the `roc_panel()` helper at the top of `R/Figure 2.R`.
+- **ROC curves** (Figure 2C, 2E) are drawn by the `roc_panel()` helper at the
+  top of `R/Figure 2.R`.
 
 ## Demonstration datasets
 
@@ -148,15 +162,6 @@ Please cite the original publications when reusing these data.
    (2020). Multiplex digital spatial profiling of proteins and RNA in fixed
    tissue. *Nature Biotechnology* **38**, 586–599.
    https://doi.org/10.1038/s41587-020-0472-9
-4. Kim, L., Ramasamy, K., and Sharma, A. (2026). Protocol for spatial
-   profiling of immune cells in the mouse cornea and conjunctiva using
-   NanoString GeoMx DSP and nCounterPro platforms. *STAR Protocols* **7**,
-   104458. https://doi.org/10.1016/j.xpro.2026.104458
-5. Amaria, R. N., Reddy, S. M., Tawbi, H. A., Davies, M. A., Ross, M. I.,
-   Glitza, I. C., Cormier, J. N., Lewis, C., Hwu, W. J., Hanna, E., et al.
-   (2018). Neoadjuvant immune checkpoint blockade in high-risk resectable
-   melanoma. *Nature Medicine* **24**, 1649–1654.
-   https://doi.org/10.1038/s41591-018-0197-1
 6. Newman, A. M., Steen, C. B., Liu, C. L., Gentles, A. J.,
    Chaudhuri, A. A., Scherer, F., Khodadoust, M. S., Esfahani, M. S.,
    Luca, B. A., Steiner, D., et al. (2019). Determining cell type abundance
