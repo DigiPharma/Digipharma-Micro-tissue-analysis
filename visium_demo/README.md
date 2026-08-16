@@ -24,8 +24,9 @@ scripts.
 | `tissue_hires_image.png` | the tissue image behind panels A and B |
 
 These four derived files are committed so that **`R/Figure S2.R` runs from a
-fresh clone with no download**. The raw slide itself is not committed; the
-script downloads it on first run and `data/` is gitignored.
+fresh clone with no download**. The raw slide itself is not committed;
+`4_format_breast_regression.py` downloads it into `data/` on first run, and
+`data/` is gitignored.
 
 Bins containing fewer than eight spots are dropped, which is why some grid
 squares in panel A are unfilled.
@@ -43,8 +44,8 @@ one. The script downloads the slide into `data/` on first run.
 python 4_format_breast_regression.py   # -> breast_roi_immune_matrix.csv
 ```
 
-Python needs `scanpy`, `squidpy`, `anndata`, `pandas`, `numpy` and
-`scikit-misc` on Python 3.10 or newer.
+Python needs `scanpy`, `pandas`, `numpy`, `scipy` and `scikit-misc` on
+Python 3.10 or newer.
 
 ## Then run the model step from the repository root
 

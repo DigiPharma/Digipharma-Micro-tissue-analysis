@@ -1,8 +1,9 @@
-# Micro-tissue analysis for identifying cellular and molecular signatures from spatial profiling data
+# Protocol for identifying cellular and molecular signatures from spatial profiling data using micro-tissue analysis
 
 Reproducible R code, raw demonstration data, and pre-rendered figures for the
-four worked examples in the STAR Protocols article *Micro-tissue analysis for
-identifying cellular and molecular signatures from spatial profiling data*.
+four worked examples in the STAR Protocols article *Protocol for identifying
+cellular and molecular signatures from spatial profiling data using micro-tissue
+analysis*.
 
 ## Authors
 
@@ -43,6 +44,8 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
 
 ```
 .
+├── LICENSE                 # MIT for the code; demonstration data carved out
+├── CITATION.cff            # how to cite this software
 ├── R/
 │   ├── Figure 1.R   — PLS-R of CD8A in immune-rich GBM ROIs
 │   ├── Figure 2.R   — PLS-DA prediction model for treatment response (5 panels A–E)
@@ -115,7 +118,7 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
 ## Notes on the analysis
 
 - **Multivariate model.** All four worked examples use partial least squares
-  (PLS).<sup>7</sup> Examples 1, 3, and 4 use PLS regression (PLS-R, continuous
+  (PLS).<sup>5</sup> Examples 1, 3, and 4 use PLS regression (PLS-R, continuous
   outcome); example 2 uses PLS discriminant analysis (PLS-DA, categorical
   outcome).
 - **VIP scores** are computed via the inline helper `pls_vip()`, which
@@ -128,20 +131,48 @@ to Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
   test (default behaviour of `wilcox.test()`).
 - **ROC curves** (Figure 2C, 2E) are drawn by the `roc_panel()` helper at the
   top of `R/Figure 2.R`.
+- **Cross-validation folds are fixed.** Every modelling script calls
+  `set.seed(42)` before `plsr()`, so R²X, R²Y, and Q² reproduce exactly from a
+  fresh clone.
 
 ## Demonstration datasets
 
 | Folder | Source | Tissue | Profiling |
 |---|---|---|---|
-| `Nat commun data/` | Lu et al., 2021<sup>1</sup> | GBM tumours treated with neoadjuvant anti-PD-1 (168 ROIs across 14 tumours) | GeoMx DSP, 40-protein immuno-oncology panel |
+| `Nat commun data/` | Lu et al., 2021<sup>1</sup> | GBM tumours treated with neoadjuvant anti-PD-1 (168 ROIs across 14 tumours) | GeoMx DSP, 35-protein immuno-oncology panel |
 | `Cell Rep data/`   | Ng et al., 2023<sup>2</sup> | Lung and gut autopsy tissue from a COVID-19 case (53 ROIs) | GeoMx DSP, 1,833-transcript Cancer Transcriptome Atlas |
 
 Both demonstration datasets were generated on the NanoString (Bruker) GeoMx
 Digital Spatial Profiler.<sup>3</sup> The cell-fraction inputs in
 `Cell Rep data/` were derived from the spatial transcript data using
-CIBERSORTx.<sup>6</sup>
+CIBERSORTx.<sup>4</sup>
 
 Please cite the original publications when reusing these data.
+
+## Citation
+
+An archived version of record is deposited at Zenodo:
+
+> Hu, H., Ng, A. H. C., and Lu, Y. (2026). Micro-tissue analysis: R code for
+> identifying cellular and molecular signatures from spatial profiling data.
+> Zenodo. https://doi.org/10.5281/zenodo.19967582
+
+That DOI is the **concept DOI**, which always resolves to the most recent
+version of the archive. Each individual release also has its own version DOI,
+listed in the Versions panel on the Zenodo record. `CITATION.cff` carries the
+same metadata in machine-readable form.
+
+## License
+
+The code in `R/` and `visium_demo/` is released under the **MIT license**; see
+`LICENSE`.
+
+The demonstration data are not covered by it. The files in `Nat commun data/`
+and `Cell Rep data/` are taken from Lu et al.<sup>1</sup> and Ng et al.<sup>2</sup>
+and remain subject to the terms of those publications. The files in
+`visium_demo/` derived from the 10x Genomics
+*V1_Breast_Cancer_Block_A_Section_1* dataset are subject to the 10x Genomics
+terms of use for that dataset. Cite the original source when reusing either.
 
 ## References
 
@@ -162,13 +193,13 @@ Please cite the original publications when reusing these data.
    (2020). Multiplex digital spatial profiling of proteins and RNA in fixed
    tissue. *Nature Biotechnology* **38**, 586–599.
    https://doi.org/10.1038/s41587-020-0472-9
-6. Newman, A. M., Steen, C. B., Liu, C. L., Gentles, A. J.,
+4. Newman, A. M., Steen, C. B., Liu, C. L., Gentles, A. J.,
    Chaudhuri, A. A., Scherer, F., Khodadoust, M. S., Esfahani, M. S.,
    Luca, B. A., Steiner, D., et al. (2019). Determining cell type abundance
    and expression from bulk tissues with digital cytometry.
    *Nature Biotechnology* **37**, 773–782.
    https://doi.org/10.1038/s41587-019-0114-2
-7. Wold, S., Sjöström, M., and Eriksson, L. (2001). PLS-regression: a basic
+5. Wold, S., Sjöström, M., and Eriksson, L. (2001). PLS-regression: a basic
    tool of chemometrics. *Chemometrics and Intelligent Laboratory Systems*
    **58**, 109–130.
    https://doi.org/10.1016/S0169-7439(01)00155-1
