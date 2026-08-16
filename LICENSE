@@ -1,0 +1,56 @@
+MIT License
+
+Copyright (c) 2026 Huiqian Hu, Alphonsus H. C. Ng, and Yue Lu
+
+This license applies to the software in this repository: the R scripts in "R/"
+and the Python scripts in "visium_demo/". The demonstration datasets are covered
+separately, in the section below.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+Demonstration data
+-------------------------------------------------------------------------------
+
+The files in "Nat commun data/" and "Cell Rep data/" are not covered by the MIT
+license above. They are taken from two published studies and remain subject to
+the terms of those publications. Cite the original publication when reusing
+either dataset.
+
+  Nat commun data/
+    Lu, Y., Ng, A. H. C., Chow, F. E., Everson, R. G., Helmink, B. A.,
+    Tetzlaff, M. T., Thakur, R., Wargo, J. A., Cloughesy, T. F., Prins, R. M.,
+    and Heath, J. R. (2021). Resolution of tissue signatures of therapy
+    response in patients with recurrent GBM treated with neoadjuvant anti-PD1.
+    Nature Communications 12, 4031.
+    https://doi.org/10.1038/s41467-021-24293-4
+
+  Cell Rep data/
+    Ng, A. H. C., Hu, H., Wang, K., Scherler, K., Warren, S. E.,
+    Zollinger, D. R., McKay-Fleisch, J., Sorg, K., Beechem, J. M.,
+    Ragaglia, E., et al. (2023). Organ-specific immunity: A tissue analysis
+    framework for investigating local immune responses to SARS-CoV-2.
+    Cell Reports 42, 113212.
+    https://doi.org/10.1016/j.celrep.2023.113212
+
+The files in "visium_demo/" that derive from the 10x Genomics
+V1_Breast_Cancer_Block_A_Section_1 dataset, including "tissue_hires_image.png",
+"scalefactors_json.json", "spot_to_roi.csv" and "breast_roi_immune_matrix.csv",
+are subject to the 10x Genomics terms of use for that dataset.

@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it using the metadata below."
+title: "Micro-tissue analysis: R code for identifying cellular and molecular signatures from spatial profiling data"
+type: software
+authors:
+  - given-names: Huiqian
+    family-names: Hu
+    email: huiqian.hu@utah.edu
+    affiliation: "Department of Molecular Pharmaceutics, University of Utah, Salt Lake City, UT 84112, USA"
+  - given-names: "Alphonsus H. C."
+    family-names: Ng
+    email: alphonsus.ng@pharm.utah.edu
+    affiliation: "Department of Molecular Pharmaceutics and Department of Biomedical Engineering, University of Utah, Salt Lake City, UT 84112, USA"
+  - given-names: Yue
+    family-names: Lu
+    email: yue.lu@pharm.utah.edu
+    affiliation: "Department of Molecular Pharmaceutics, University of Utah, Salt Lake City, UT 84112, USA"
+doi: 10.5281/zenodo.19967582
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.19967582
+    description: "Concept DOI. Always resolves to the most recent version of the archive."
+repository-code: "https://github.com/DigiPharma/Digipharma-Micro-tissue-analysis"
+license: MIT
+keywords:
+  - spatial profiling
+  - partial least squares
+  - GeoMx DSP
+  - multivariate analysis
+  - tumor microenvironment
+  - reproducible analysis
+abstract: >-
+  R code, demonstration data, and pre-rendered figures for micro-tissue analysis,
+  a workflow that groups spatially profiled tissue regions by microenvironment and
+  models all measured features together to identify which genes, proteins, or cell
+  types collectively drive a biological outcome. Four worked examples are provided
+  on two published GeoMx Digital Spatial Profiler datasets, with a fifth
+  demonstration on 10x Genomics Visium.
