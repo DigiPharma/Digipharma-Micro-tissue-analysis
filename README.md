@@ -153,9 +153,9 @@ Please cite the original publications when reusing these data.
 
 An archived version of record is deposited at Zenodo:
 
-> Hu, H., Ng, A. H. C., and Lu, Y. (2026). Micro-tissue analysis: R code for
-> identifying cellular and molecular signatures from spatial profiling data.
-> Zenodo. https://doi.org/10.5281/zenodo.19967582
+> Hu, H., Ng, A. H. C., and Lu, Y. (2026). Protocol for identifying cellular
+> and molecular signatures from spatial profiling data using micro-tissue
+> analysis. Zenodo. https://doi.org/10.5281/zenodo.19967582
 
 That DOI is the **concept DOI**, which always resolves to the most recent
 version of the archive. Each individual release also has its own version DOI,

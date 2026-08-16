@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite it using the metadata below."
-title: "Micro-tissue analysis: R code for identifying cellular and molecular signatures from spatial profiling data"
+title: "Protocol for identifying cellular and molecular signatures from spatial profiling data using micro-tissue analysis"
 type: software
 authors:
   - given-names: Huiqian
